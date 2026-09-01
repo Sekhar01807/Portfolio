@@ -1,0 +1,100 @@
+---
+title: "NovaCall"
+publishedAt: "2025-05-01"
+summary: "An open-source real-time video conferencing platform built with a custom peer-to-peer WebRTC mesh engine, low-latency Socket.IO signaling, and server-authoritative room moderation."
+video: "/videos/projects/novacall/Novacall.mp4"
+images:
+  - "/images/projects/novacall/novacall-hero.png"
+  - "/images/projects/novacall/novacall-dashboard.png"
+  - "/images/projects/novacall/novacall-schedule.png"
+  - "/images/projects/novacall/novacall-lobby.png"
+  - "/images/projects/novacall/novacall-meeting.png"
+  - "/images/projects/novacall/novacall-screenshare.png"
+  - "/images/projects/novacall/novacall-history.png"
+  - "/images/projects/novacall/novacall-settings.png"
+  - "/images/projects/novacall/novacall-signin.png"
+  - "/images/projects/novacall/novacall-signup.png"
+team:
+  - name: "Sekhar Reddy"
+    role: "Software Engineer"
+    avatar: "/images/avatar-sekhar.jpg"
+    linkedIn: "https://www.linkedin.com/in/sekhar-reddy-408560281"
+link: "https://novacall-two.vercel.app/"
+github: "https://github.com/Sekhar01807/Novacall"
+tags:
+  - "WebRTC Full-Mesh"
+  - "Socket.IO"
+  - "React 19"
+  - "Express 5"
+  - "Material UI"
+  - "Zero-Trust Auth"
+  - "Playwright E2E"
+---
+
+## Overview
+
+NovaCall is an open-source real-time video conferencing platform built around a custom full-mesh WebRTC engine and a modular Socket.IO signaling layer. Instead of depending on commercial WebRTC wrappers, the platform handles the core communication pipeline directly, combining peer-to-peer audio and video, adaptive STUN/TURN connectivity, server-authoritative room moderation, real-time chat, native screen sharing, meeting scheduling, transactional email, secure authentication, and activity tracking. The system is designed as a complete meeting workflow rather than a collection of isolated conferencing features.
+
+### From Entry to Live Meeting
+
+The experience begins before a user enters a call. Visitors can explore the platform through the landing page or launch an instant guest meeting, while registered users can authenticate through the secure sign-in and registration flow. Once inside the application, the dashboard acts as the conference hub, allowing users to create a dynamic room instantly, join an existing room through a short code, view upcoming scheduled meetings, and return to recent meeting activity. Scheduled meetings can include a title, agenda, date, start time, duration, timezone, and guest invitations, with calendar-style email cards providing recipients with a direct join path.
+
+Before entering the meeting itself, NovaCall introduces a dedicated pre-call lobby that verifies camera and microphone readiness, checks browser permissions, previews the local video feed, and allows the participant to configure their display identity. This separates device preparation from the actual conference stage and gives the user a clear readiness check before the WebRTC connection begins.
+
+### Building the Real-Time Communication Layer
+
+At the center of NovaCall is a custom WebRTC mesh architecture in which participants establish direct peer-to-peer media connections. Socket.IO provides the signaling and real-time event layer required to coordinate those connections and maintain shared room state. STUN servers are used to discover direct network paths, while TURN provides a relay fallback when restrictive network conditions prevent direct connectivity. The platform deliberately enforces a six-participant room limit because the chosen full-mesh topology requires each participant to maintain connections with the others.
+
+This architecture also gives the application room-level awareness beyond the media streams themselves. Participant presence, audio and video state, host status, and moderation actions are maintained through the signaling layer, allowing the server to remain authoritative over the state of the meeting while media itself continues to flow directly between peers.
+
+### Making the Room Server-Authoritative
+
+Moderation is handled as part of the real-time architecture rather than being left to the client interface. The first participant entering a room is automatically designated as the host and receives the ability to mute another participant, remove a disruptive participant, or terminate the meeting for everyone. When the active host disconnects, NovaCall promotes the next longest-standing participant so the room can continue without requiring the meeting to be recreated. These actions are validated against server-side room state, preventing a client from simply presenting itself as the host through manipulated frontend state.
+
+The participant panel makes this shared state visible to everyone in the meeting by displaying connected participants, host status, and individual audio and video states. Alongside that presence information, the connection diagnostics badge exposes live round-trip latency and packet-loss measurements, translating low-level connection telemetry into an understandable quality indicator.
+
+### Extending the Meeting Beyond Video
+
+The meeting stage is designed as more than a video grid. NovaCall includes a dedicated in-meeting chat channel using Socket.IO room communication, with optimistic rendering for responsive interaction and synchronization of recent messages when participants join. Because the chat channel is another real-time surface, it is protected with a sliding-window rate limiter, server-side HTML sanitization, payload limits, and room isolation to prevent abuse and cross-room communication.
+
+Screen sharing follows the same browser-native approach as the media pipeline. NovaCall uses the `getDisplayMedia` API to allow participants to share an entire screen, application window, or browser tab, with optional system or tab audio. The shared stream can replace the active webcam track dynamically and return to the camera when sharing ends, keeping the participant inside the same meeting session.
+
+### Designing Security Into the Communication Model
+
+Security in NovaCall is implemented across both the REST API and the WebSocket signaling boundary. Authentication uses secure HttpOnly cookies so JWT credentials are not exposed through JSON responses or browser local storage, while the token-version mechanism allows all active sessions to be revoked when credentials are changed or a global sign-out is performed. The application also applies explicit profile DTO filtering, generic authentication responses to reduce account enumeration, CSRF and origin validation for state-changing requests, and atomic resource queries to prevent unauthorized access to another user's meetings, history, or profile data.
+
+The same security model continues into Socket.IO. A real-time event passes through authentication, room-membership verification, payload validation, authorization, and finally the state transition itself. This means that joining a room is not enough to gain control over its state: host-only actions are checked against server-side room ownership, cross-room signaling and chat are rejected, and rate-limit state is cleaned up when sockets disconnect.
+
+Password recovery follows the same principle. Verification codes are generated cryptographically, stored only as SHA-256 hashes, protected by a five-attempt limit, and invalidated after fifteen minutes or successful use. The reset flow can then deliver the verification code through the configured SMTP provider while retaining a controlled development fallback for testing.
+
+### Completing the Conference Lifecycle
+
+NovaCall treats a meeting as a lifecycle that continues after participants leave the room. Meeting activity is recorded with timestamps, room codes, and completion states, while paginated history and search allow users to locate previous sessions and rejoin them quickly. Profile settings extend this lifecycle into account management, including personal information updates, timezone preferences, password changes, global session revocation, and transactional account deletion that removes the user's associated meeting and history data.
+
+The platform also uses transactional email to connect actions inside the application with external communication. Registration can trigger an onboarding email, scheduled meetings can generate calendar-style invitation cards for hosts and guests, and password recovery can send short-lived verification codes. These flows are implemented through Nodemailer and configurable SMTP providers rather than being treated as separate manual processes.
+
+### Engineering the System Around Clear Boundaries
+
+The architecture separates the responsibilities of the application into distinct layers. React 19 and Vite form the frontend, Node.js and Express provide the REST API, Socket.IO handles real-time signaling, MongoDB Atlas stores persistent application data, and Nodemailer manages transactional messaging. Docker and Docker Compose provide a reproducible multi-service development environment, while Nginx and cloud deployment components support the deployed application. Automated validation is handled through Node's test runner and Playwright browser tests.
+
+The implementation is organized around separate controllers, middleware, models, services, Socket.IO handlers, room state, frontend pages, WebRTC hooks, and meeting components. The Socket.IO layer is further divided into room, signaling, chat, media, and moderation responsibilities, allowing the real-time system to evolve without concentrating every event inside a single server module.
+
+### Validation Through Real Workflows
+
+Testing was built around the areas where a real-time application is most likely to fail. Backend tests cover authentication, password reset behavior, session revocation, IDOR protection, scheduled meetings, socket lifecycle, moderation, room limits, chat rate limiting, XSS sanitization, room isolation, and WebRTC signaling boundaries. Browser-level Playwright tests then exercise complete user journeys such as registration, login, meeting creation, lobby preparation, multi-browser peer discovery, meeting controls, chat, history, and navigation.
+
+This combination is important for NovaCall because many of its behaviors cannot be validated reliably through isolated API tests alone. A signaling event may depend on authentication, room membership, participant state, and another connected browser at the same time. Testing therefore focuses on both the individual security boundaries and the complete experience that emerges when those boundaries interact.
+
+### Architectural Trade-Offs
+
+NovaCall intentionally chooses a full-mesh topology and a six-participant room capacity instead of introducing an SFU architecture for larger meetings. This keeps the implementation understandable while making the networking trade-off explicit: each participant maintains peer connections with the others, which increases client bandwidth and CPU requirements as room size grows. Similarly, active room state and participant presence are held in process memory for low-latency signaling in the current single-instance model, with Redis-backed Socket.IO infrastructure identified as the natural next step for horizontal scaling.
+
+This makes the architecture deliberately scoped rather than pretending to be infinitely scalable. The current system is optimized around demonstrating the real-time communication problem thoroughly, while documenting the architectural direction required if the platform were later expanded to larger rooms or multiple backend instances.
+
+### Result
+
+NovaCall brings the complete meeting lifecycle into one real-time application: users can authenticate, create or schedule a room, invite participants, prepare their devices, establish peer-to-peer audio and video connections, communicate through chat, share their screens, moderate participants, leave the meeting, and review the resulting activity afterward. Throughout that lifecycle, authentication and authorization continue to protect both persistent resources and real-time room state.
+
+### What NovaCall Demonstrates
+
+NovaCall demonstrates the engineering challenges behind a real-time application from the networking layer upward. Its strongest focus is the integration of custom WebRTC media, Socket.IO signaling, authoritative room state, moderation, secure authentication, real-time chat and screen sharing, transactional communication, and automated validation. Rather than attempting to reproduce every capability of a large commercial conferencing platform, the project deliberately concentrates on building and proving the core real-time workflow end to end.

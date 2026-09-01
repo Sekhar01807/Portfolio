@@ -1,0 +1,99 @@
+---
+title: "PulseTrade"
+publishedAt: "2025-04-01"
+summary: "A full-stack paper-trading platform featuring real-time equity market data streaming with Socket.IO, fail-closed multi-document ACID financial ledgers, and portfolio analytics."
+video: "/videos/projects/pulsetrade/PulseTrade.mp4"
+images:
+  - "/images/projects/pulsetrade/pulsetrade-hero.png"
+  - "/images/projects/pulsetrade/pulsetrade-dashboard.png"
+  - "/images/projects/pulsetrade/pulsetrade-holdings.png"
+  - "/images/projects/pulsetrade/pulsetrade-positions.png"
+  - "/images/projects/pulsetrade/pulsetrade-funds.png"
+  - "/images/projects/pulsetrade/pulsetrade-razorpay.png"
+  - "/images/projects/pulsetrade/pulsetrade-profile.png"
+  - "/images/projects/pulsetrade/pulsetrade-create-account.png"
+  - "/images/projects/pulsetrade/pulsetrade-signin.png"
+team:
+  - name: "Sekhar Reddy"
+    role: "Software Engineer"
+    avatar: "/images/avatar-sekhar.jpg"
+    linkedIn: "https://www.linkedin.com/in/sekhar-reddy-408560281"
+link: "https://pulsetrade-ten.vercel.app"
+github: "https://github.com/Sekhar01807/Trading-platform"
+tags:
+  - "React 19"
+  - "Express 5"
+  - "MongoDB Atlas"
+  - "ACID Transactions"
+  - "Socket.IO"
+  - "Razorpay SDK"
+  - "Jest & Supertest"
+---
+
+## Overview
+
+PulseTrade is a full-stack paper-trading platform built to simulate equity trading while reproducing some of the core flows found in a real trading application. Instead of connecting users to live financial exchanges, the platform provides an isolated trading environment where users can monitor market prices, place simulated orders, manage virtual funds, track holdings and intraday positions, and follow their portfolio performance in real time. The project combines a React trading terminal with a Node.js and Express backend, MongoDB-based financial records, Socket.IO market-data streaming, secure authentication, and a sandboxed payment workflow.
+
+### The Trading Experience
+
+The main trading terminal is designed around the information a trader needs while making a decision. Live index values and stock prices are streamed into the interface through Socket.IO, while the portfolio view continuously reflects available margin, invested capital, current valuation, and profit or loss. A watchlist provides real-time updates across multiple equities, allowing the user to move from market observation to order execution without leaving the trading workspace.
+
+The same real-time data feeds the portfolio and position views. Holdings maintain their weighted average purchase price as additional BUY orders are executed, while open positions expose quantity, average execution price, live market price, and unrealized mark-to-market performance. Delivery holdings and intraday positions are kept as separate concepts so the portfolio reflects the different behaviors of those trading products.
+
+### Simulating the Order Lifecycle
+
+The core of PulseTrade is the order lifecycle. When a user submits a BUY or SELL order, the server—not the browser—determines the actual execution price from the available market feed and the application's approved tradable-symbol list. MARKET orders execute against the current server-side market price, while LIMIT orders only execute when the current market price satisfies the requested limit condition. This separation between requested price, market price, and executed price is intended to make the simulator behave like a controlled trading environment rather than simply accepting values supplied by the client.
+
+Every successful trade also needs to keep multiple pieces of financial state synchronized. A BUY affects available funds, portfolio holdings, the order record, and the transaction ledger, while a SELL must verify that the requested shares are actually owned before changing the same financial state. PulseTrade handles these operations through MongoDB session transactions so that a trade either completes as a complete unit or is rolled back without leaving partially updated financial records.
+
+### Protecting Financial Consistency
+
+Because trading systems are especially sensitive to race conditions, the backend also applies conditional balance and inventory checks when transactions are processed. These safeguards are designed to prevent situations such as two concurrent BUY requests spending the same balance or multiple SELL requests disposing of shares that are no longer available. If validation fails, the order is rejected and recorded without modifying the user's funds or holdings.
+
+Financial values are handled through dedicated currency utilities that standardize decimal rounding and paise conversion, keeping wallet balances, order costs, and ledger records mathematically consistent. This is particularly important in a trading simulator because apparently small rounding differences can accumulate across repeated transactions and cause the portfolio totals to diverge.
+
+### Funds as a Real Ledger
+
+PulseTrade treats virtual capital as more than a single balance field. The funds interface exposes available cash, capital committed to stocks, portfolio valuation, and overall gains, while each deposit, withdrawal, order debit, and credit contributes to an immutable transaction history with balance snapshots. This creates a traceable financial lifecycle from the initial virtual deposit through subsequent trading activity.
+
+The platform also includes a Razorpay sandbox integration for simulated deposits. A payment cannot simply trigger a balance increase from the client; the server first expects a valid pending payment record, verifies the payment amount and ownership, validates the HMAC-SHA256 signature, and then performs the wallet credit and ledger insertion inside an atomic transaction. Idempotency handling prevents retries from crediting the same payment more than once.
+
+### Real-Time Market Data
+
+The real-time component is not limited to a decorative ticker. PulseTrade maintains a market ticker service that streams prices for the supported NSE instruments through Socket.IO. Clients can dynamically subscribe to and unsubscribe from symbols, while authenticated WebSocket connections can receive user-specific notifications. Outside normal market hours, the system can generate synthetic micro-ticks so the trading interface remains demonstrable even without relying on a continuously changing exchange feed.
+
+This streaming architecture connects directly to the user's portfolio experience. As prices change, holdings and open positions can reflect updated mark-to-market values, making the relationship between market movement and portfolio performance visible inside the same application rather than requiring a manual refresh.
+
+### Security and User Isolation
+
+PulseTrade treats the trading account as an isolated financial workspace. Authenticated resources such as orders, holdings, positions, funds, transactions, and payment verification are scoped to the authenticated user identity, and integration tests specifically verify that one user cannot read or mutate another user's portfolio records. This prevents the most basic multi-user integrity failure in a financial application.
+
+Authentication uses Bcrypt password hashing with a work factor of 12 and secure HttpOnly, SameSite, Secure JWT cookies. Session invalidation is handled through token versioning so a global sign-out can revoke active sessions across devices. Authentication endpoints also use generic failure messages and dedicated rate limiting to reduce account enumeration and brute-force attempts.
+
+### A Deliberately Controlled Simulation
+
+PulseTrade is intentionally a simulation rather than a broker. The system operates within a predefined set of tradable instruments and never routes orders to real exchanges such as the NSE or BSE. That constraint makes it possible to focus on the engineering problems that are useful for demonstrating a trading platform—order validation, portfolio accounting, financial transactions, real-time pricing, and user isolation—without creating a system that claims to execute real financial trades.
+
+The project also provides a seeded demo portfolio so the complete trading experience can be explored immediately. A fresh account can be populated with a virtual ₹50,000 balance, a set of NSE equity holdings, and intraday positions, allowing the real-time market stream and portfolio calculations to be demonstrated without requiring the user to build a portfolio from scratch.
+
+### Architecture
+
+The application follows a separated full-stack architecture in which the React trading terminal handles the user experience, the Express backend controls authentication and business rules, MongoDB stores financial records, and Socket.IO provides the real-time market communication layer. Domain logic is kept inside dedicated services such as authentication, orders, holdings, wallet operations, and market ticker processing rather than being concentrated inside route controllers.
+
+This separation is especially important for the trading workflow because validation and financial rules must remain server-authoritative. The client is responsible for expressing the user's intent, while the backend decides whether that intent is valid, how the transaction should be executed, and what persistent financial state should result.
+
+### Validation Through Automated Testing
+
+PulseTrade places significant emphasis on testing the business rules that matter most. The automated suite covers authentication, order validation, MARKET and LIMIT execution behavior, weighted average cost calculations, user isolation, wallet operations, Razorpay signature verification, idempotent payment replay protection, and deliberate ACID rollback scenarios. Service-level tests then exercise the financial and market-data logic independently, while middleware tests validate authentication and rate-limiting behavior.
+
+One particularly important validation path is failure injection around database transactions. The project explicitly tests scenarios where a transaction is interrupted to verify that the financial operation is aborted cleanly rather than leaving behind partially updated funds, holdings, or ledger records. This reinforces the central design principle that a financial operation should either complete consistently or not happen at all.
+
+### Result
+
+PulseTrade brings together the major pieces of a realistic paper-trading workflow in one application. A user can create an account, receive an isolated trading ledger, observe live market movement, maintain a watchlist, place simulated MARKET or LIMIT orders, track holdings and positions, manage virtual funds, verify sandbox deposits, and monitor portfolio performance as market prices change. The supporting backend protects the financial state through server-side pricing, transactional updates, concurrency controls, user isolation, and automated verification.
+
+The result is not intended to reproduce the infrastructure of a real brokerage. Instead, PulseTrade focuses on demonstrating the engineering principles behind a trading platform: **real-time market state, server-authoritative execution, atomic financial updates, accurate portfolio accounting, secure user isolation, and reliable transaction workflows.**
+
+### What This Project Demonstrates
+
+PulseTrade demonstrates how a full-stack application can model a domain where correctness matters as much as interface design. The project connects a real-time frontend with server-controlled market data, transactional order execution, portfolio accounting, wallet management, payment verification, and security boundaries. Its strongest engineering challenge is maintaining a consistent financial state while multiple asynchronous events—market updates, orders, payments, and user actions—move through the system.

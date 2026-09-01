@@ -1,0 +1,110 @@
+---
+title: "WanderLust"
+publishedAt: "2025-02-01"
+summary: "A full-stack vacation rental marketplace featuring a two-tier reservation hold and collision auto-refund engine, Mapbox geospatial discovery, and Stripe checkout."
+video: "/videos/projects/wanderlust/Wanderlust.mp4"
+images:
+  - "/images/projects/wanderlust/wanderlust-hero.png"
+  - "/images/projects/wanderlust/wanderlust-listings.png"
+  - "/images/projects/wanderlust/wanderlust-host-dashboard.png"
+  - "/images/projects/wanderlust/wanderlust-booking.png"
+  - "/images/projects/wanderlust/wanderlust-property-management.png"
+  - "/images/projects/wanderlust/wanderlust-edit-property.png"
+  - "/images/projects/wanderlust/wanderlust-create-listing.png"
+  - "/images/projects/wanderlust/wanderlust-login.png"
+  - "/images/projects/wanderlust/wanderlust-signup.png"
+team:
+  - name: "Sekhar Reddy"
+    role: "Software Engineer"
+    avatar: "/images/avatar-sekhar.jpg"
+    linkedIn: "https://www.linkedin.com/in/sekhar-reddy-408560281"
+link: "https://wanderlust-hs70.onrender.com/"
+github: "https://github.com/Sekhar01807/WanderLust"
+tags:
+  - "Express 5 MVC"
+  - "MongoDB Atlas"
+  - "Mapbox Geospatial"
+  - "Stripe Webhooks"
+  - "Dual-Token CSRF"
+  - "Two-Tier Booking Engine"
+---
+
+## Overview
+
+WanderLust is a full-stack vacation-rental and hospitality platform designed around the complete journey of discovering, listing, booking, and managing stays. Inspired by the interaction model of platforms such as Airbnb, the application connects travelers and hosts through property discovery, map-based exploration, persistent wishlists, secure bookings, payments, messaging, reviews, notifications, and host management. Underneath the user-facing experience, the platform is built around MongoDB Atlas, Express 5, Stripe Checkout, Mapbox, Cloudinary, and layered application security.
+
+### The Product Experience
+
+The traveler journey begins with discovery. WanderLust provides a responsive landing and exploration experience where users can browse properties through curated travel categories, move between destinations, and view listings through a visual catalog. Property addresses are converted into geographic coordinates through Mapbox geocoding, allowing listings to be presented with interactive maps and location-aware information. Pricing can also be viewed with or without applicable tax through a dynamic calculation toggle, keeping the browsing experience connected to the actual booking context.
+
+Once a traveler finds a property, the experience moves naturally from exploration into reservation. Guests select their intended dates and receive an updated booking price before entering Stripe Checkout. The system does not treat payment as the only source of truth for availability; instead, it creates a temporary reservation hold before checkout so another traveler is unlikely to reserve the same dates during the payment window.
+
+### Solving Booking Concurrency
+
+The most important engineering problem in WanderLust is the gap between a customer beginning checkout and Stripe confirming payment. The platform addresses this with a two-tier reservation strategy. First, the application creates a temporary 30-minute hold in MongoDB and aligns that hold with the Stripe Checkout expiration period. Before availability is evaluated, expired holds are removed so stale reservations do not permanently block dates.
+
+The second layer handles the edge case where concurrent activity still results in overlapping payments. Stripe's webhook acts as the authoritative post-payment source, rechecking the reservation state after payment succeeds. If a collision is detected, the platform does not leave the customer with a paid but unavailable reservation; it triggers an automated Stripe refund and reconciles the booking state. This creates a deliberate flow of **hold → payment → verification → fulfillment or refund**, rather than assuming that a successful checkout automatically means a valid booking.
+
+### Making Cancellation Reliable
+
+The booking lifecycle continues after payment. Cancellation uses atomic state transitions so simultaneous cancellation requests cannot repeatedly change the same reservation. Stripe idempotency keys are also used during refund execution to protect against duplicated refund operations when requests are retried. Together, these mechanisms keep the booking record and its associated payment state aligned even when operations are repeated or arrive concurrently.
+
+Completed reservations can also produce digital receipts that are accessible only to the appropriate guest or property owner. A waitlist mechanism extends the lifecycle further by allowing travelers to subscribe to unavailable dates, while a compound uniqueness constraint prevents duplicate subscriptions for the same listing, traveler, and date range.
+
+### Building the Host Experience
+
+WanderLust is not designed only around travelers. Hosts receive a separate management experience for monitoring the properties they operate and understanding how those properties are performing. The host dashboard brings together revenue, active bookings, completed stays, cancellations, hosted nights, upcoming arrivals, and listing-management actions so that the same platform can support both sides of the hospitality workflow.
+
+Property management begins with listing creation. Hosts can provide property information, categorize the accommodation, define pricing, enter an address for automatic Mapbox geocoding, and upload multiple images through Cloudinary. Existing listings can later be edited, their primary showcase image can be changed, and additional gallery images can be managed without rebuilding the listing from scratch. This keeps property presentation and property operations inside the same workflow.
+
+### Personalization and Discovery
+
+Travelers can maintain a persistent wishlist that belongs to their own account rather than being stored only in browser state. Toggling a property produces immediate visual feedback while the underlying wishlist remains available across sessions and devices. The dedicated wishlist view then becomes a personal discovery space where previously saved properties can be revisited without searching the entire catalog again.
+
+Profile management follows the same persistence model. Users can maintain personal information, contact details, biography, preferred languages, country, and reservation history, while profile images uploaded through Cloudinary are propagated across the application. The updated avatar can appear in navigation, listing cards, reviews, messages, and reservation views, giving the profile state a consistent presence throughout the platform.
+
+### Connecting Travelers and Hosts
+
+Booking is not always the end of the interaction. WanderLust includes private in-app messaging so guests and hosts can communicate around a property or booking inquiry. Conversations are scoped to the relevant relationship, preventing unrelated users from accessing the thread. The messaging interface also uses safe DOM rendering rather than inserting untrusted message content directly into HTML, reducing the risk of client-side XSS through user-generated text.
+
+Reviews follow the same relationship model. A traveler cannot simply review any property after creating an account; the platform verifies that the user actually completed a paid stay before accepting the review. Review deletion is similarly scoped so that users can remove reviews they are authorized to manage while preserving ownership boundaries around other participants' content.
+
+### Automated Communication
+
+The platform extends its booking workflow into automated communication through transactional email and scheduled background jobs. Booking confirmations, receipts, cancellation and refund notices, waitlist alerts, password-reset messages, and upcoming check-in or check-out reminders can be generated as part of the reservation lifecycle. A daily cron process handles scheduled reminders so travelers receive useful information without needing to revisit the platform manually.
+
+This creates an important connection between application state and user communication: a booking is not simply stored in a database; its lifecycle can produce confirmations, changes, reminders, and availability notifications automatically.
+
+### Security as a Booking Requirement
+
+Because WanderLust handles accounts, reservations, payments, uploaded media, and private communication, security is integrated throughout the application rather than isolated inside authentication. The platform uses session-backed CSRF protection for both traditional forms and asynchronous requests, sanitizes MongoDB inputs, restricts uploaded file types and sizes, applies strict Content Security Policy directives, and uses route-level authorization for ownership-sensitive operations.
+
+The payment webhook is treated as a particularly sensitive boundary. Stripe webhook payloads are received as raw request data and must pass cryptographic signature verification before the application performs any fulfillment logic. Invalid, missing, or tampered signatures are rejected rather than processed through a fallback path. Password-reset tokens are stored as SHA-256 hashes with expiration, and session-version tracking allows active sessions to be invalidated after a password change.
+
+### Data Boundaries and Authorization
+
+Authorization is based on the relationship between the authenticated user and the resource being accessed. Property owners can modify their own listings, travelers can manage their own bookings and wishlists, and messaging is limited to participants who have an authorized connection to the property or reservation. Reviews, receipts, booking actions, and account operations follow similar ownership checks.
+
+This is particularly important in a multi-user marketplace because many resources look structurally similar. A valid listing identifier or booking identifier is not enough by itself; the application must verify that the current user is actually permitted to operate on that resource. WanderLust therefore combines authentication with ownership and relationship-level middleware to maintain those boundaries.
+
+### Architecture
+
+WanderLust follows an MVC-oriented Express architecture with dedicated controllers, routes, models, middleware, utilities, and view layers. MongoDB stores users, listings, bookings, reviews, messages, and waitlist records, while Cloudinary manages listing and profile media. Mapbox provides address geocoding and interactive geographic presentation, and Stripe handles checkout and payment events.
+
+The architecture keeps transactional booking logic outside the views and route definitions, with dedicated utilities responsible for booking fulfillment, refund handling, CSRF protection, scheduled jobs, and email dispatch. This separation allows the application's most sensitive workflow—the reservation and payment lifecycle—to remain centralized rather than being spread across individual page handlers.
+
+### Testing the Critical Paths
+
+Testing in WanderLust concentrates on the places where a booking system is most vulnerable to inconsistent state. Automated tests cover temporary reservation holds, expiration and cleanup, concurrent booking collisions, Stripe webhook signature validation, idempotent fulfillment, cancellation races, refund behavior, CSRF enforcement, message authorization, schema validation, session security, token protection, and content-security controls.
+
+The test suite also deliberately exercises failure cases rather than focusing only on successful requests. Webhook tampering, expired holds, duplicate fulfillment, concurrent cancellation, unauthorized conversations, and security-boundary violations are all treated as conditions that the application should reject safely. This mirrors the architecture's broader fail-closed approach to sensitive operations.
+
+### Result
+
+WanderLust provides an end-to-end hospitality workflow in which discovery, property management, reservation, payment, communication, reviews, and post-booking notifications operate as parts of the same system. A traveler can discover a property, inspect its location, save it, select dates, complete a sandboxed Stripe checkout, receive booking communication, message the host, and later review the stay. At the same time, the host can manage listings, monitor reservations, track performance, and communicate with guests through the same platform.
+
+The project's strongest engineering challenge is not the listing interface itself, but maintaining trustworthy booking state around an inherently asynchronous payment process. The combination of temporary reservation holds, authoritative Stripe webhooks, collision detection, automatic refunds, atomic cancellation, idempotency, and strict authorization gives the booking workflow a clear consistency model.
+
+### What This Project Demonstrates
+
+WanderLust demonstrates how a full-stack marketplace can connect a polished user experience with the backend rules required to keep a multi-user booking system consistent. Its core strengths are the traveler-to-host workflow, transactional reservation handling, Stripe reconciliation, persistent user state, relationship-based messaging and reviews, geospatial listing discovery, and defense-in-depth security. Rather than simply recreating the appearance of a vacation-rental platform, the project focuses on the underlying state-management problems that make booking systems reliable.

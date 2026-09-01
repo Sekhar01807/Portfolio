@@ -1,0 +1,79 @@
+---
+title: "GolfForGood"
+publishedAt: "2025-01-01"
+summary: "A full-stack SaaS platform connecting 18-hole Stableford golf performance tracking with verified charitable giving and simulated monthly prize draws."
+video: "/videos/projects/golfforgood/GolfforGood.mp4"
+images:
+  - "/images/projects/golfforgood/golfforgood-hero.png"
+  - "/images/projects/golfforgood/golfforgood-how-it-works.png"
+  - "/images/projects/golfforgood/golfforgood-dashboard.png"
+  - "/images/projects/golfforgood/golfforgood-scores.png"
+  - "/images/projects/golfforgood/golfforgood-billing.png"
+  - "/images/projects/golfforgood/golfforgood-stripe-checkout.png"
+  - "/images/projects/golfforgood/golfforgood-settings.png"
+  - "/images/projects/golfforgood/golfforgood-join.png"
+  - "/images/projects/golfforgood/golfforgood-signin.png"
+team:
+  - name: "Sekhar Reddy"
+    role: "Software Engineer"
+    avatar: "/images/avatar-sekhar.jpg"
+    linkedIn: "https://www.linkedin.com/in/sekhar-reddy-408560281"
+link: "https://golf-for-good-six.vercel.app/"
+github: "https://github.com/Sekhar01807/Golf-Platform"
+tags:
+  - "Next.js 16 App Router"
+  - "React 19"
+  - "Supabase"
+  - "PostgreSQL RLS"
+  - "Stripe Billing"
+  - "Database RPC"
+  - "Vitest"
+---
+
+## Overview
+
+GolfForGood is a full-stack SaaS platform that connects golf performance tracking with charitable giving. The idea is simple: golfers record authentic 18-hole Stableford rounds, maintain a small performance history, and use their membership to contribute to partner charities while participating in a simulated monthly skill-based prize draw.
+
+The project was designed as more than a dashboard with payment integration. The core challenge was creating a trustworthy flow around user scores, subscriptions, charitable contributions, and financial calculations. The implementation combines Next.js, React, TypeScript, Supabase PostgreSQL, Stripe, and a security-focused database architecture to keep these flows consistent and reliable.
+
+## Problem
+
+Golf performance tracking and charitable giving are usually separate experiences. A golfer may track scores in one place, manage memberships somewhere else, and contribute to causes through another service. GolfForGood explores how these interactions could be brought together into one focused member experience without making the product feel complicated.
+
+The bigger engineering challenge was maintaining correctness as money and user-generated scores move through the system. Duplicate payments, repeated webhook events, concurrent score submissions, incorrect prize calculations, and unauthorized access could all create inconsistent data. The platform therefore treats database integrity and transaction safety as part of the product experience rather than as an afterthought.
+
+## Approach
+
+The product experience was built around a straightforward member journey. A golfer creates an account, chooses a membership plan and charity contribution percentage, completes the subscription through Stripe, and then uses the member dashboard to record their Stableford rounds. Once five rounds are available, the golfer becomes eligible for the monthly simulated draw.
+
+Instead of building a large collection of features, the implementation concentrates on making these core flows dependable. The dashboard keeps the scoring experience simple, while the backend handles the complexity behind subscriptions, charity allocations, score history, draw calculations, verification, and audit records.
+
+## Experience
+
+The member dashboard acts as the central point of the product. It gives golfers an immediate view of their subscription status, draw eligibility, current five-round scoring history, average performance, and recent activity. Entering a score is intentionally lightweight: the golfer records their Stableford score and date, while the application maintains the active five-round history automatically.
+
+When a sixth round is submitted, the oldest score is removed automatically, keeping the five-round window consistent without requiring the golfer to manage their history manually. The same principle carries into the subscription experience, where golfers choose their plan and charity allocation before being taken through Stripe's hosted checkout rather than navigating a complicated custom payment flow.
+
+## Technical Decisions
+
+The architecture uses Next.js 16 with the App Router and TypeScript across the application, with Supabase providing PostgreSQL, authentication, Row-Level Security, database functions, and triggers. Business-critical operations are deliberately pushed into atomic database procedures. For example, score submission locks the relevant user row, enforces the five-score limit, removes the oldest score when necessary, and inserts the new result as one transaction.
+
+Financial operations follow the same philosophy. Stripe webhook events are recorded in a dedicated ledger so that retries do not accidentally create duplicate subscriptions or donations. Checkout creation uses a short-lived database lock to prevent concurrent sessions, while donation records are protected by unique payment identifiers. Monetary calculations use integer paise rather than floating-point values to avoid rounding inconsistencies.
+
+## Real-Time Flow
+
+The most important asynchronous flow begins when a golfer completes a Stripe checkout. Stripe sends the completed event to the application, where the webhook signature is verified before the event is claimed and processed. The database then activates the subscription and stores the selected charity allocation, while the system can send a confirmation email through Resend. Repeated webhook deliveries are safely ignored once an event has already been completed.
+
+The monthly draw follows a similarly controlled sequence. Eligible members are evaluated against a generated set of winning numbers, with the simulated prize pool divided across matching tiers. Calculations are performed using integer values, and unused allocations or division remainders are carried forward as rollover amounts. Before results become visible, an atomic publication procedure updates the draw, records winners, updates totals, and creates an audit entry together.
+
+## Verification & Trust
+
+Because the simulated draw can produce winners, the platform includes a verification step rather than treating a winning result as an automatic payout. A winner submits a URL to their physical scorecard, after which an administrator reviews the evidence before approving or rejecting the result. Database constraints prevent a payout from being marked as paid unless the associated verification has been approved.
+
+Security is also built around a fail-closed model. Row-Level Security isolates member data, Zod validates incoming requests before business logic executes, sensitive endpoints use sliding-window rate limiting, and database triggers protect important state transitions. If an atomic database operation cannot complete, the request fails instead of falling back to an unsafe direct write.
+
+## Result
+
+The result is a focused full-stack SaaS prototype that demonstrates how a relatively simple consumer experience can sit on top of carefully designed backend workflows. From subscription checkout and charity allocation to score tracking, simulated draws, verification, and donations, each critical flow is backed by validation, transactional processing, and controlled state changes.
+
+The project is also supported by an automated Vitest suite covering security boundaries, validation, authorization, draw computation, failure recovery, webhook idempotency, and rate limiting. With 102 passing tests, GolfForGood demonstrates not only the visible product experience but also the engineering discipline required to make financial and user-data workflows predictable and resilient.

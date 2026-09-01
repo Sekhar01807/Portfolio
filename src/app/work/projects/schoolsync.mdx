@@ -1,0 +1,115 @@
+---
+title: "SchoolSync"
+publishedAt: "2025-03-01"
+summary: "An enterprise-grade academic operations platform featuring AI-assisted conflict-free timetable scheduling, multi-tier grading matrix, and automated attendance notifications."
+video: "/videos/projects/schoolsync/SchoolSync.mp4"
+images:
+  - "/images/projects/schoolsync/schoolsync-hero.png"
+  - "/images/projects/schoolsync/schoolsync-roles.png"
+  - "/images/projects/schoolsync/schoolsync-admin-dashboard.png"
+  - "/images/projects/schoolsync/schoolsync-timetable-admin.png"
+  - "/images/projects/schoolsync/schoolsync-attendance-register.png"
+  - "/images/projects/schoolsync/schoolsync-academic-reports.png"
+  - "/images/projects/schoolsync/schoolsync-class-analytics.png"
+  - "/images/projects/schoolsync/schoolsync-announcements.png"
+  - "/images/projects/schoolsync/schoolsync-teacher-portal.png"
+  - "/images/projects/schoolsync/schoolsync-teacher-rollcall.png"
+  - "/images/projects/schoolsync/schoolsync-teacher-schedule.png"
+  - "/images/projects/schoolsync/schoolsync-assessment-setup.png"
+  - "/images/projects/schoolsync/schoolsync-student-hub.png"
+  - "/images/projects/schoolsync/schoolsync-student-timetable.png"
+  - "/images/projects/schoolsync/schoolsync-student-attendance.png"
+  - "/images/projects/schoolsync/schoolsync-student-report-card.png"
+  - "/images/projects/schoolsync/schoolsync-profile.png"
+  - "/images/projects/schoolsync/schoolsync-signin.png"
+  - "/images/projects/schoolsync/schoolsync-create-account.png"
+team:
+  - name: "Sekhar Reddy"
+    role: "Software Engineer"
+    avatar: "/images/avatar-sekhar.jpg"
+    linkedIn: "https://www.linkedin.com/in/sekhar-reddy-408560281"
+link: "https://schoolsync-chi.vercel.app/"
+github: "https://github.com/Sekhar01807/School-Management"
+tags:
+  - "Google Gemini 1.5 Flash"
+  - "Inngest Workers"
+  - "Multi-Role RBAC"
+  - "React 19"
+  - "Express 5"
+  - "MongoDB Atlas"
+  - "Automated Cron Alerts"
+---
+
+## Overview
+
+SchoolSync is a full-stack academic management platform designed to bring the core daily operations of a school into one connected system. Instead of treating attendance, examinations, timetables, student records, reports, announcements, and user management as isolated modules, the platform connects them through role-based workflows for administrators, teachers, and students, while also maintaining guardian information for communication and attendance alerts. The application is built around a service-oriented backend, centralized authorization, dynamic academic calculations, asynchronous AI workflows, and persistent school data.
+
+### The Problem
+
+Schools often manage academic information across disconnected tools and manual processes. Timetables can contain teacher or classroom conflicts, attendance can be difficult to track consistently, assessment systems may follow different grading structures, and students and staff may not have a single place to access the information relevant to them. SchoolSync was designed to bring these workflows together while maintaining a clear separation between institutional management, faculty responsibilities, and student academic information.
+
+### Designing Around School Roles
+
+The platform begins with the principle that different users should see different parts of the academic system. Administrators receive an institutional view covering students, faculty, classes, examinations, attendance, academic performance, and system activity. Teachers work primarily with their assigned classes, lecture schedules, attendance registers, assessments, gradebooks, and class performance. Students receive a personal academic view centered around their timetable, attendance, examinations, grades, and report card. Guardian relationships are maintained through student records, allowing attendance and institutional notifications to reach linked parent or guardian contacts.
+This role separation continues beyond the interface. Server-side authorization checks determine what each user can access, while object-level checks ensure that a teacher cannot retrieve unrelated student records and that students remain limited to their own academic information. This makes the application behave like a connected school system rather than a collection of pages guarded only by frontend visibility rules.
+
+### Creating a Consistent Academic Model
+
+SchoolSync uses a standardized assessment structure so academic performance can be calculated consistently across the institution. Unit Assessments are evaluated out of 25 marks, Mid-Term examinations out of 50, and Quarterly Final examinations out of 100. These assessments feed into a cumulative performance model that calculates overall percentage, CGPA on a 10-point scale, GPA on a 4-point scale, and corresponding academic standing.
+
+The same academic model flows into the teacher gradebook and student report card. Teachers can work with a class roster and enter marks in batches while the system enforces the applicable assessment limit and calculates grade badges from the submitted scores. Students then receive their own academic results through the report-card experience, while administrators and authorized faculty can inspect broader class or institutional performance.
+
+### Managing the School Day
+
+Attendance and timetables form the operational side of the platform. Teachers can record daily attendance using Present, Late, Absent, and Excused states, while administrators can view broader attendance statistics and class completion information. Students receive a personal attendance record, including their attendance rate and threshold status. Behind the scenes, a background process monitors attendance and can trigger warning emails when a student's rate drops below the configured 75 percent threshold, with delivery handled through a primary email provider and fallback SMTP channel.
+Scheduling is handled as another shared institutional workflow. Administrators can generate weekly timetables through an asynchronous AI workflow, while the scheduling logic is built around constraints intended to prevent teacher and classroom conflicts and maintain subject-teacher alignment. The resulting timetable can then be viewed at the class level or through teacher- and student-specific schedule experiences.
+
+### Bringing Assessments Online
+
+The assessment system extends beyond static marks entry into an online examination workflow. Faculty or administrators can generate quiz content using Gemini by specifying factors such as subject, topic, difficulty, and question count. Generated exams remain subject to server-side validation before publication, and student responses are evaluated against protected answer keys so learners receive grading feedback without gaining access to the underlying answers.
+
+This creates a complete assessment lifecycle: an assessment can be generated, reviewed and published by authorized staff, attempted by the appropriate students, automatically graded, and reflected in the student's academic results. The system also enforces conditions such as valid deadlines, question availability, class membership, and one-submission boundaries to keep the workflow consistent.
+
+### Communication as Part of the Workflow
+
+SchoolSync treats announcements as an institutional communication layer rather than a simple message board. Administrators and authorized teachers can publish notices for the entire school, specific roles, or selected class sections, while announcements can carry different urgency levels. Recipients see only the broadcasts relevant to their role or class context, and authors retain control over the content they created.
+
+The same communication model extends into automated notifications. Attendance alerts can be sent to students and their linked guardians when attendance falls below the threshold, while other email workflows support onboarding and background institutional processes. This creates a connection between changes inside the academic system and the people responsible for acting on them.
+
+### Security and Institutional Data Boundaries
+
+Because SchoolSync handles academic records belonging to multiple users, data isolation is treated as a core architectural requirement. Authentication uses signed JWT sessions stored in HttpOnly secure cookies, while role authorization and object-level access helpers establish the boundaries for classes, students, reports, attendance, exports, and other resources. A teacher, for example, can work with students connected to their assigned classes, while a student is restricted to their own academic records. Guardian access is similarly constrained to registered child relationships.
+
+The backend also applies validation and defensive protections around incoming data. Zod schemas provide structured request validation, recursive sanitization removes prohibited MongoDB operators, export endpoints enforce the same access boundaries as normal API requests, and rate limiters protect sensitive authentication, recovery, registration, and export operations. These controls are intended to ensure that authorization is preserved even when requests are made directly against the API rather than through the frontend.
+
+### Architecture Built Around Services and Events
+
+The application follows a layered architecture in which controllers handle transport concerns while service modules contain domain logic for users, exams, reports, attendance, and other academic operations. MongoDB and Mongoose provide persistent storage, TypeScript provides application-wide type safety, and the frontend uses React with Tailwind CSS for the role-based interface. Asynchronous tasks such as AI timetable generation and quiz generation are delegated to Inngest workflows, allowing heavier operations to remain outside the synchronous request path.
+This separation is particularly useful for the AI-powered features. The timetable generator is not treated as a direct frontend-to-model request; instead, the backend dispatches an event-driven workflow, processes the model output against expected structures and scheduling constraints, and persists the resulting academic schedule. The test suite also includes defensive parsing and resilience cases for generated AI content, recognizing that model output cannot simply be trusted as structured application data.
+
+### Real-Time Academic Operations
+
+The platform's strongest real-time behavior is centered on operational school activities rather than attempting to make every module continuously live. Attendance records are reflected in institutional analytics, announcements can be updated across relevant audiences, and background processes can react to academic state changes such as low attendance. This keeps the real-time aspect focused on areas where immediate information propagation actually benefits the user.
+
+The dashboard layer brings those operational signals together for each role. Administrators can monitor institutional activity, teachers can move from their schedule into attendance and grading workflows, and students can see their own academic state through attendance, timetable, assessments, and results. The result is a connected experience where the same underlying school data is surfaced differently depending on who is using it.
+
+### Reporting and Data Export
+
+SchoolSync also provides formal reporting capabilities so information inside the application can be taken beyond the dashboard. Student report cards combine assessment results, subject-level performance, percentage, grades, and cumulative CGPA, while class analytics provide averages, score distributions, and pass rates. Attendance registers, report cards, and student rosters can also be exported as structured CSV files for administrative or academic use.
+These exports follow the same authorization model as the application itself. A teacher's export scope is limited to the students and classes they are allowed to access, while students can retrieve their own report-card information. This ensures that reporting does not become an accidental bypass around the platform's normal data boundaries.
+
+### Validation Through Automated Testing
+
+SchoolSync places significant emphasis on verifying the rules that drive the academic system. The repository reports 93 automated test suites containing 207 test assertions covering AI workflow resilience, assessment grading, CSV generation, email notifications, academic calculations, MongoDB input sanitization, role-based access control, JWT behavior, password hashing, and other data-integrity rules.
+
+The tests are particularly relevant to the application's risk areas. Academic calculations are validated across the different assessment scales, generated AI content is tested for defensive parsing, attendance and email logic are exercised around threshold conditions, and security middleware is verified against role escalation and unsafe MongoDB operators. This gives the project a stronger foundation than a purely interface-driven school management application.
+
+### Result
+
+SchoolSync brings the main academic and operational workflows of a school into one connected platform. Administrators can manage institutional structure and monitor school-wide activity, teachers can manage attendance, schedules, assessments, and student performance, and students can follow their academic progress through their own personalized workspace. Behind those experiences, shared services, role-aware APIs, background workflows, and persistent academic records keep the system consistent across the different parts of the application.
+
+The project deliberately focuses on the areas where a school management system demonstrates meaningful full-stack engineering: **role-based access, academic calculations, attendance operations, assessment workflows, timetable generation, real-time institutional updates, automated notifications, and secure multi-user data isolation**.
+
+### What This Project Demonstrates
+
+SchoolSync demonstrates how a complex real-world domain can be reduced into connected workflows without losing the rules that make the domain meaningful. The project combines a role-adaptive frontend with a service-based backend, secure authorization boundaries, structured academic calculations, event-driven AI workflows, automated notifications, reporting, and extensive automated testing. Its strongest characteristic is not the number of modules it contains, but the way those modules share the same underlying academic data and permissions to create one coherent school-management experience.
