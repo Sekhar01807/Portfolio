@@ -23,7 +23,7 @@
 
 ---
 
-## 👨‍💻 About Me
+## About Me
 
 I am a **Full-Stack Software Engineer** focused on architecting secure, resilient, and high-performance web applications, distributed real-time systems, and transactional financial workflows.
 
@@ -36,7 +36,7 @@ My engineering work centers around the complex layers beneath the user interface
 
 ---
 
-## 🚀 Featured Engineering Projects
+## Featured Engineering Projects
 
 ### 1. [NovaCall](https://novacall-two.vercel.app/) — Real-Time Video Conferencing & WebRTC Platform
 > **Live Demo:** [novacall-two.vercel.app](https://novacall-two.vercel.app/) &nbsp;|&nbsp; **Source Code:** [GitHub](https://github.com/Sekhar01807/Novacall)
@@ -102,7 +102,7 @@ A full-stack SaaS platform connecting 18-hole Stableford golf performance tracki
 
 ---
 
-## 🛠️ Technical Skills & Architecture
+## Technical Skills & Architecture
 
 | Category | Technologies & Tools |
 |---|---|
@@ -116,7 +116,7 @@ A full-stack SaaS platform connecting 18-hole Stableford golf performance tracki
 
 ---
 
-## 🎓 Education & Certifications
+## Education & Certifications
 
 - **B.Tech in Computer Science & Engineering (CSE)**
   *Amrita Vishwa Vidyapeetham, Amaravati* (2023 – 2027)
@@ -133,7 +133,7 @@ A full-stack SaaS platform connecting 18-hole Stableford golf performance tracki
 
 ---
 
-## ⚡ Portfolio Features
+## Portfolio Architecture & Features
 
 This portfolio repository is built with:
 - **Next.js 16 (App Router)** & **React 19** for blazing-fast server-rendered performance and static generation.
@@ -144,7 +144,7 @@ This portfolio repository is built with:
 
 ---
 
-## 💻 Local Development Setup
+## Local Development Setup
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) v18.17 or higher
@@ -175,7 +175,7 @@ npm start
 
 ---
 
-## 📬 Contact & Connect
+## Contact & Connect
 
 - **Email:** [sekharsekhar1919@gmail.com](mailto:sekharsekhar1919@gmail.com)
 - **LinkedIn:** [linkedin.com/in/sekhar-reddy-408560281](https://www.linkedin.com/in/sekhar-reddy-408560281)
