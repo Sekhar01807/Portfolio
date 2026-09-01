@@ -13,8 +13,14 @@ import {
 } from "@/types";
 import { home, person, social } from "./content";
 
-// IMPORTANT: Replace with your own domain address - it's used for SEO in meta tags and schema
-const baseURL: string = "https://demo.magic-portfolio.com";
+// Base URL for metadata, SEO, and OpenGraph images
+const baseURL: string =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "https://demo.magic-portfolio.com");
 
 const routes: RoutesConfig = {
   "/": true,

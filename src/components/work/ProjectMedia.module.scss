@@ -1,0 +1,186 @@
+.videoWrapper {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  margin-top: var(--static-space-8, 8px);
+  margin-bottom: var(--static-space-20, 20px);
+  border-radius: var(--radius-l, 16px);
+  overflow: hidden;
+  box-shadow:
+    0 20px 50px -15px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--neutral-alpha-medium, rgba(255, 255, 255, 0.1));
+  background: var(--surface, rgba(14, 15, 20, 0.95));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+
+  &:hover {
+    box-shadow:
+      0 28px 65px -15px rgba(0, 0, 0, 0.75),
+      0 0 0 1px var(--neutral-alpha-strong, rgba(255, 255, 255, 0.2));
+  }
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(18, 19, 26, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  user-select: none;
+  gap: 10px;
+}
+
+.trafficLights {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 50px;
+}
+
+.trafficDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.urlBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 14px;
+  border-radius: 6px;
+  max-width: 500px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lockIcon {
+  color: var(--brand-solid-strong, #38bdf8);
+  flex-shrink: 0;
+}
+
+.urlText {
+  font-size: 12px;
+  color: var(--neutral-on-background-weak, rgba(255, 255, 255, 0.7));
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.liveIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 60px;
+}
+
+.pulseDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulseDot 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.pulseText {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #22c55e;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  background-color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 260px;
+}
+
+.videoElement {
+  width: 100%;
+  height: auto;
+  max-height: 800px;
+  object-fit: contain;
+  display: block;
+  outline: none;
+  background-color: #000000;
+}
+
+@media (max-width: 768px) {
+  .browserBar {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .trafficLights {
+    min-width: auto;
+    gap: 6px;
+  }
+
+  .trafficDot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .urlBar {
+    padding: 4px 10px;
+  }
+
+  .urlText {
+    font-size: 11px;
+  }
+
+  .liveIndicator {
+    min-width: auto;
+  }
+
+  .pulseText {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .videoWrapper {
+    border-radius: var(--radius-m, 14px);
+    margin-top: 8px;
+    margin-bottom: 20px;
+  }
+
+  .browserBar {
+    padding: 8px 10px;
+  }
+}
+
