@@ -124,7 +124,7 @@ export default function Home() {
               Production Platforms
             </Text>
           </Column>
-          <Line vert height="36" s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               170+
@@ -133,7 +133,7 @@ export default function Home() {
               Automated Tests
             </Text>
           </Column>
-          <Line vert height="36" s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               Real-Time
@@ -142,7 +142,7 @@ export default function Home() {
               WebRTC & WebSockets
             </Text>
           </Column>
-          <Line vert height="36" s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               100%
