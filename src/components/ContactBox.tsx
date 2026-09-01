@@ -31,7 +31,8 @@ export const ContactBox: React.FC<React.ComponentProps<typeof Column>> = ({ ...f
       fillWidth
       padding="xl"
       radius="l"
-      marginBottom="m"
+      marginBottom="80"
+      style={{ marginBottom: "5rem" }}
       horizontal="center"
       align="center"
       background="surface"
