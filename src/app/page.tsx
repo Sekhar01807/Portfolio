@@ -105,16 +105,16 @@ export default function Home() {
       <RevealFx translateY="12" delay={0.5} fillWidth>
         <Row
           fillWidth
-          paddingX="l"
-          paddingY="m"
+          fitHeight
+          paddingX="24"
+          paddingY="16"
           radius="l"
           background="surface"
           border="neutral-alpha-weak"
           horizontal="between"
           vertical="center"
-          wrap
           gap="24"
-          s={{ direction: "column", align: "start", gap: "16" }}
+          s={{ direction: "column", align: "start", gap: "16", padding: "16" }}
         >
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
@@ -124,7 +124,7 @@ export default function Home() {
               Production Platforms
             </Text>
           </Column>
-          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert maxHeight="32" s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               170+
@@ -133,7 +133,7 @@ export default function Home() {
               Automated Tests
             </Text>
           </Column>
-          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert maxHeight="32" s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               Real-Time
@@ -142,7 +142,7 @@ export default function Home() {
               WebRTC & WebSockets
             </Text>
           </Column>
-          <Line vert height={36} s={{ hide: true }} background="neutral-alpha-weak" />
+          <Line vert maxHeight="32" s={{ hide: true }} background="neutral-alpha-weak" />
           <Column gap="2">
             <Heading variant="display-strong-s" style={{ color: "var(--brand-solid-strong)" }}>
               100%
